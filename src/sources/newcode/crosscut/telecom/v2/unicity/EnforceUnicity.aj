@@ -1,19 +1,22 @@
 package telecom.v2.unicity;
 
 import telecom.v2.util.NotUniqueException;
+import telecom.v2.common.*;
 
 public aspect EnforceUnicity {
 	
-	pointcut uniqueIdUse() : 
-		set(final String telecom.v2.unicity.UniqueId);
+	private pointcut uniqueIdTypeError() :
+		set(@UniqueId (boolean||char||byte||short||int||long||float||double) *.*)  && Pointcuts.inDomain();
 	
-	public pointcut uniqueIdUseNotAccepted() :
-		set(@UniqueId * *) && set(!final !String *);
+	private pointcut uniqueIdFinalError() :
+		set(@UniqueId !final * *) && Pointcuts.inDomain();
 	
-	public pointcut uniqueIdArgs(String arg):
+	private pointcut uniqueIdArgs(String arg):
 		set(@UniqueId * *) && args(arg);
 	
-	declare error : uniqueIdUseNotAccepted() : "Not authorize to use @UniqueId on not final or not string fields";
+	declare error : uniqueIdTypeError() : "Authorize to use @UniqueId on String fields only";
+		
+	declare error : uniqueIdFinalError() : "This attribute should be final";
 	
 	after(String arg) : uniqueIdArgs(arg) {
 		if (Unicity.id_used(arg)) {
