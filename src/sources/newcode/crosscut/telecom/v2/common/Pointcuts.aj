@@ -13,6 +13,9 @@ public aspect Pointcuts {
 	
     public pointcut inDomain() :
         within(telecom.v2.connect.*) || within(telecom.v2.simulate.*);
+    
+    public pointcut inTracing() :
+    	within(telecom.v2.trace.*);
 
     pointcut duringSimulation() :
         cflowbelow(call(void Simulation.run()));
