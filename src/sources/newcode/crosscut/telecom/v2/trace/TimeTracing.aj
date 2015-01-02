@@ -40,7 +40,7 @@ public aspect TimeTracing {
     
     after(Call ca, ICustomer c) : dropCall() && this(ca) && args(c) {
     	ca.getTimer(c).stop();
-    	Tracer.makeCallLog("Temps de connexion : " + ca.getTimer(c).getTime() + " s");
+    	Tracer.logPrintln("Temps de connexion : " + ca.getTimer(c).getTime() + " s");
     }
 
 }

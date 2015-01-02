@@ -22,15 +22,18 @@ public class Tracer {
 		message += "\n";
 	}
 
-	public static void makeCallLog(String text) {
+	public static void logPrintln(String text) {
 		message += makeIndentation() + text;
 		addEmptyLine();
 	}
 	
-	public static void makeConnectionLog(String text) {
+	public static void logPrint(String text) {
 		message += (makeIndentation() + text);
 	}
 	
+	public static void logInlineMessage(String text) {
+		message += text;
+	}
 	public static void makeAfterConnectionLog(String text) {
 		message += "-> " + text +")";
 		addEmptyLine();

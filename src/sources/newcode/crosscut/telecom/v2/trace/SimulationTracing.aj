@@ -30,6 +30,10 @@ public privileged aspect SimulationTracing {
         return result;
     }
 	
+	public Set<ICustomer> Call.getDropped() {
+		return dropped;
+	}
+	
 	public String Call.toString() {
 		String result = "<" + caller.getName();
         result += setToString(this.pending.keySet());
@@ -63,7 +67,7 @@ public privileged aspect SimulationTracing {
 		JoinPoint jp = thisJoinPoint;
 		String methName = jp.getSignature().getName();
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		Tracer.INDENTATIONS++;
 	}
 	
@@ -71,7 +75,7 @@ public privileged aspect SimulationTracing {
 		Tracer.INDENTATIONS--;
 		JoinPoint jp = thisJoinPoint;
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		if (Tracer.INDENTATIONS == 0) {
 			Tracer.addEmptyLine();
 		}
@@ -81,7 +85,7 @@ public privileged aspect SimulationTracing {
 		JoinPoint jp = thisJoinPoint;
 		String methName = jp.getSignature().getName();
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		Tracer.INDENTATIONS++;
 	}
 	
@@ -89,7 +93,7 @@ public privileged aspect SimulationTracing {
 		Tracer.INDENTATIONS--;
 		JoinPoint jp = thisJoinPoint;
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		if (Tracer.INDENTATIONS == 0) {
 			Tracer.addEmptyLine();
 		}
@@ -99,7 +103,7 @@ public privileged aspect SimulationTracing {
 		JoinPoint jp = thisJoinPoint;
 		String methName = jp.getSignature().getName();
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		Tracer.INDENTATIONS++;
 	}
 	
@@ -107,7 +111,7 @@ public privileged aspect SimulationTracing {
 		Tracer.INDENTATIONS--;
 		JoinPoint jp = thisJoinPoint;
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		if (Tracer.INDENTATIONS == 0) {
 			Tracer.addEmptyLine();
 		}
@@ -117,7 +121,7 @@ public privileged aspect SimulationTracing {
 		JoinPoint jp = thisJoinPoint;
 		String methName = jp.getSignature().getName();
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 		Tracer.INDENTATIONS++;
 	}
 	
@@ -125,7 +129,7 @@ public privileged aspect SimulationTracing {
 		Tracer.INDENTATIONS--;
 		JoinPoint jp = thisJoinPoint;
 		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.makeCallLog(sm.format(jp));
+		Tracer.logPrintln(sm.format(jp));
 	}
 	
 	before(Object x, Object o) : connectionChangedState() && target(x) && args(o) {
@@ -136,7 +140,7 @@ public privileged aspect SimulationTracing {
 			if (field.get(x) != null) {
 				value = field.get(x).toString();
 			}
-			Tracer.makeConnectionLog(x + "(" + value);
+			Tracer.logPrint(x + "(" + value);
 		} catch (IllegalAccessException | NoSuchFieldException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
