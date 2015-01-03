@@ -3,6 +3,7 @@ package telecom.v2.billing;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import telecom.v2.connect.Call;
 import telecom.v2.connect.ICustomer;
@@ -16,6 +17,10 @@ public privileged aspect BillingAspect {
 	
 	public int Call.getPrice() {
 		return price;
+	}
+	
+	public Set<ICustomer> Call.getPendingCustomers() {
+		return pending.keySet();
 	}
 	
 	public int Call.getPriceForCustomer(ICustomer c) {

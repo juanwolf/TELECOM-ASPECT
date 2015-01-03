@@ -36,7 +36,7 @@ public privileged aspect SimulationTracing {
 	
 	public String Call.toString() {
 		String result = "<" + caller.getName();
-        result += setToString(this.pending.keySet());
+        result += setToString(pending.keySet());
         result += setToString(complete.keySet());
         result += setToString(dropped);
         return result + ">";
