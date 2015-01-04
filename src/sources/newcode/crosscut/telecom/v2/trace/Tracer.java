@@ -6,7 +6,7 @@ public class Tracer {
 	
 	private static Logger LOGGER = Logger.getLogger(SimulationFormatter.class.getName());
 
-	public static int INDENTATIONS = 0;
+	private static int INDENTATIONS = 0;
 	
 	private static String message;
 	
@@ -41,5 +41,22 @@ public class Tracer {
 	
 	public static void writeLog() {
 		LOGGER.info(message);
+	}
+
+	public static void addTabulation() {
+		INDENTATIONS++;
+		
+	}
+
+	public static void removeTabulation() {
+		INDENTATIONS--;
+		
+	}
+
+	public static void addEmptyLineIfNecessary() {
+		if (INDENTATIONS == 0) {
+			addEmptyLine();
+		}
+		
 	}
 }

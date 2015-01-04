@@ -11,35 +11,26 @@ import telecom.v2.connect.Call;
 import telecom.v2.connect.ICustomer;
 
 public privileged aspect SimulationTracing {
+	/**
+	 * Factorisation du code pour les advices before pour les pointcuts des appels à call(), hangUp(), 
+	 * pickUp() et invite()
+	 */
+	private void addToLogBeforeMessage(JoinPoint jp, Object x) {
+ 		String methName = jp.getSignature().getName();
+ 		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
+ 		Tracer.logPrintln(sm.format(jp));
+		Tracer.addTabulation();
+ 	}
 	
-	
-	
-    private final Set<ICustomer> Call.dropped = new HashSet<ICustomer>();
-	
-	private String Call.setToString(Set<ICustomer> s) {
-        String result = "|";
-        boolean first = true;
-        for (ICustomer x : s) {
-            if (first) {
-                first = false;
-            } else {
-                result += " ";
-            }
-            result += x.getName();
-        }
-        return result;
-    }
-	
-	public Set<ICustomer> Call.getDropped() {
-		return dropped;
-	}
-	
-	public String Call.toString() {
-		String result = "<" + caller.getName();
-        result += setToString(pending.keySet());
-        result += setToString(complete.keySet());
-        result += setToString(dropped);
-        return result + ">";
+	/**
+	 * Factorisation du code pour les advices after pour les pointcuts des appels à call(), 
+	 * hangUp(), pickUp() et invite()
+		 */
+	private void addToLogAfterMessage(JoinPoint jp, Object x) {
+		Tracer.removeTabulation();
+	 	SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
+	 	Tracer.logPrintln(sm.format(jp));
+		Tracer.addEmptyLineIfNecessary();
 	}
 	
 	private pointcut connectionEventDrop():
@@ -63,73 +54,19 @@ public privileged aspect SimulationTracing {
 	private pointcut customerGetCall() :
 		call(* telecom.v2.connect.ICustomer.getCall(..)) && Pointcuts.inTracing();
 	
-	before(Object x):  customerCall() && target(x) {
-		JoinPoint jp = thisJoinPoint;
-		String methName = jp.getSignature().getName();
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.logPrintln(sm.format(jp));
-		Tracer.INDENTATIONS++;
+	before(Object x):  (customerCall()
+			|| customerHangUp()
+			|| customerPickUp()
+			|| callInvite())
+			&& target(x) {
+		addToLogBeforeMessage(thisJoinPoint, x);
 	}
 	
-	after(Object x) : customerCall() && target(x) {
-		Tracer.INDENTATIONS--;
-		JoinPoint jp = thisJoinPoint;
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.logPrintln(sm.format(jp));
-		if (Tracer.INDENTATIONS == 0) {
-			Tracer.addEmptyLine();
-		}
-	}
-	
-	before(Object x) : customerHangUp() && target(x) {
-		JoinPoint jp = thisJoinPoint;
-		String methName = jp.getSignature().getName();
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.logPrintln(sm.format(jp));
-		Tracer.INDENTATIONS++;
-	}
-	
-	after(Object x) : customerHangUp() && target(x) {
-		Tracer.INDENTATIONS--;
-		JoinPoint jp = thisJoinPoint;
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.logPrintln(sm.format(jp));
-		if (Tracer.INDENTATIONS == 0) {
-			Tracer.addEmptyLine();
-		}
-	}
-	
-	before(Object x) : customerPickUp() && target(x) {
-		JoinPoint jp = thisJoinPoint;
-		String methName = jp.getSignature().getName();
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.logPrintln(sm.format(jp));
-		Tracer.INDENTATIONS++;
-	}
-	
-	after(Object x) : customerPickUp() && target(x) {
-		Tracer.INDENTATIONS--;
-		JoinPoint jp = thisJoinPoint;
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.logPrintln(sm.format(jp));
-		if (Tracer.INDENTATIONS == 0) {
-			Tracer.addEmptyLine();
-		}
-	}
-	
-	before(Object x) : callInvite() && target(x) {
-		JoinPoint jp = thisJoinPoint;
-		String methName = jp.getSignature().getName();
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), methName);
-		Tracer.logPrintln(sm.format(jp));
-		Tracer.INDENTATIONS++;
-	}
-	
-	after(Object x) : callInvite() && target(x) {
-		Tracer.INDENTATIONS--;
-		JoinPoint jp = thisJoinPoint;
-		SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
-		Tracer.logPrintln(sm.format(jp));
+	after(Object x) : (customerCall()
+			|| customerHangUp()
+			|| customerPickUp()
+			|| callInvite()) && target(x) {
+		addToLogAfterMessage(thisJoinPoint, x);
 	}
 	
 	before(Object x, Object o) : connectionChangedState() && target(x) && args(o) {
@@ -145,15 +82,25 @@ public privileged aspect SimulationTracing {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Tracer.INDENTATIONS++;
+		Tracer.addTabulation();
 	}
 	
 	after(Object o) : connectionChangedState() && args(o) {
-		Tracer.INDENTATIONS--;
+		Tracer.removeTabulation();
 		Tracer.makeAfterConnectionLog(o.toString());
 	}
 	
 	after(ICustomer customer, Call ca) : connectionEventDrop() && args(customer) && this(ca) {
 			ca.dropped.add(customer);
+	}
+	private pointcut executionFinished() :
+		call(void telecom.v2.simulate.Simulation.run(..));
+	
+	before(): executionFinished() {
+		Tracer.addEmptyLine();
+	}
+	
+	after() : executionFinished() {
+		Tracer.writeLog();
 	}
 }
