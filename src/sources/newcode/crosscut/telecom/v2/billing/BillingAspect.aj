@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import telecom.v2.common.Pointcuts;
 import telecom.v2.connect.Call;
 import telecom.v2.connect.ICustomer;
 
@@ -40,7 +41,7 @@ public privileged aspect BillingAspect {
 	public int Call.getPriceForCustomer(ICustomer c) {
 		return prices.get(c);
 	}
-	 	
+	
 	/**
 	 * Ajoute le prix de la communication pour l'ICustomer c.
 	 */
@@ -48,11 +49,7 @@ public privileged aspect BillingAspect {
 		prices.put(c, price);
 	}
 	
-	
-	private pointcut updatePrice():
-		 withincode(* telecom.v2.connect.Call.hangUp(..)) && (call(* *.get(..)) || call(* *.remove(..)));
-	
-	after(Call c, ICustomer x, Object map) : updatePrice()  && this(c) && args(x) && target(map) {
+	after(Call c, ICustomer x, Object map) : Pointcuts.callStateChangedInDropped()  && this(c) && args(x) && target(map) {
 		try {
 			Field f = c.getClass().getDeclaredField("complete");
 			f.setAccessible(true);

@@ -3,12 +3,13 @@ package telecom.v2.trace;
 import java.util.HashSet;
 import java.util.Set;
 
+import telecom.v2.common.Pointcuts;
 import telecom.v2.connect.Call;
 import telecom.v2.connect.ICustomer;
 
 public privileged aspect TracingManagement {
 	
-private final Set<ICustomer> Call.dropped = new HashSet<ICustomer>();
+	private final Set<ICustomer> Call.dropped = new HashSet<ICustomer>();
 	
 	private String Call.setToString(Set<ICustomer> s) {
         String result = "|";
@@ -36,7 +37,8 @@ private final Set<ICustomer> Call.dropped = new HashSet<ICustomer>();
         return result + ">";
 	}
 	
-	
-	
+	after(ICustomer customer, Call ca) : Pointcuts.callStateChangedInDropped() && args(customer) && this(ca) {
+		ca.dropped.add(customer);
+	}
 
 }

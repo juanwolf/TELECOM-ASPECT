@@ -18,6 +18,20 @@ public class Tracer {
 		return result;
 	}
 	
+	public static void addTabulation() {
+		INDENTATIONS++;
+	}
+	
+	public static void removeTabulation() {
+		INDENTATIONS--;
+	}
+	
+	public static void addEmptyLineIfNecessary() {
+		if (INDENTATIONS == 0) {
+			addEmptyLine();
+		}
+	}
+	
 	public static void addEmptyLine() {
 		message += "\n";
 	}
@@ -43,20 +57,4 @@ public class Tracer {
 		LOGGER.info(message);
 	}
 
-	public static void addTabulation() {
-		INDENTATIONS++;
-		
-	}
-
-	public static void removeTabulation() {
-		INDENTATIONS--;
-		
-	}
-
-	public static void addEmptyLineIfNecessary() {
-		if (INDENTATIONS == 0) {
-			addEmptyLine();
-		}
-		
-	}
 }

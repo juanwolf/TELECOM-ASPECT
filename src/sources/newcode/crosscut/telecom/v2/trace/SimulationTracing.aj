@@ -1,14 +1,10 @@
 package telecom.v2.trace;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.aspectj.lang.JoinPoint;
 
 import telecom.v2.common.Pointcuts;
-import telecom.v2.connect.Call;
-import telecom.v2.connect.ICustomer;
 
 public privileged aspect SimulationTracing {
 	/**
@@ -33,43 +29,23 @@ public privileged aspect SimulationTracing {
 		Tracer.addEmptyLineIfNecessary();
 	}
 	
-	private pointcut connectionEventDrop():
-		withincode(* telecom.v2.connect.Call.hangUp(..)) && (call(* *.get(..)) || call(* *.remove(..))); 
-	
-	private pointcut customerCall() : 
-		call(* telecom.v2.connect.IC*.call(..));
-	
-	private pointcut customerHangUp() :
-		call(void telecom.v2.connect.IC*.hangUp(..));
-	
-	private pointcut customerPickUp() :
-		call(void telecom.v2.connect.IC*.pickUp(..));
-	
-	private pointcut callInvite():
-		call(void telecom.v2.connect.IC*.invite(..));
-	
-	private pointcut connectionChangedState() :
-		set(* telecom.v2.connect.Connection.state);
-	
-	private pointcut customerGetCall() :
-		call(* telecom.v2.connect.ICustomer.getCall(..)) && Pointcuts.inTracing();
-	
-	before(Object x):  (customerCall()
-			|| customerHangUp()
-			|| customerPickUp()
-			|| callInvite())
+	before(Object x):  (Pointcuts.customerCall()
+			|| Pointcuts.customerHangUp()
+			|| Pointcuts.customerPickUp()
+			|| Pointcuts.callInvite())
 			&& target(x) {
 		addToLogBeforeMessage(thisJoinPoint, x);
 	}
 	
-	after(Object x) : (customerCall()
-			|| customerHangUp()
-			|| customerPickUp()
-			|| callInvite()) && target(x) {
+	after(Object x) : (Pointcuts.customerCall()
+			|| Pointcuts.customerHangUp()
+			|| Pointcuts.customerPickUp()
+			|| Pointcuts.callInvite()) && target(x) {
+
 		addToLogAfterMessage(thisJoinPoint, x);
 	}
 	
-	before(Object x, Object o) : connectionChangedState() && target(x) && args(o) {
+	before(Object x, Object o) : Pointcuts.connectionChangedState() && target(x) && args(o) {
 		try {
 			Field field = x.getClass().getDeclaredField("state");
 			field.setAccessible(true);
@@ -85,22 +61,16 @@ public privileged aspect SimulationTracing {
 		Tracer.addTabulation();
 	}
 	
-	after(Object o) : connectionChangedState() && args(o) {
+	after(Object o) : Pointcuts.connectionChangedState() && args(o) {
 		Tracer.removeTabulation();
 		Tracer.makeAfterConnectionLog(o.toString());
 	}
 	
-	after(ICustomer customer, Call ca) : connectionEventDrop() && args(customer) && this(ca) {
-			ca.dropped.add(customer);
-	}
-	private pointcut executionFinished() :
-		call(void telecom.v2.simulate.Simulation.run(..));
-	
-	before(): executionFinished() {
+	before(): Pointcuts.simulationExecution() {
 		Tracer.addEmptyLine();
 	}
 	
-	after() : executionFinished() {
+	after() : Pointcuts.simulationExecution() {
 		Tracer.writeLog();
 	}
 }

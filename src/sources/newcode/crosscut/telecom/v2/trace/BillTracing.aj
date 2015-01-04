@@ -1,21 +1,17 @@
 package telecom.v2.trace;
 
-import java.util.Collection;
-
+import telecom.v2.common.Pointcuts;
 import telecom.v2.connect.Call;
 import telecom.v2.connect.ICall;
 import telecom.v2.connect.ICustomer;
 
-public aspect BillTracing {
-	
-	private pointcut customerHangUp() :
-		(execution(void telecom.v2.connect.IC*.hangUp(..))) && within(telecom.v2.connect.*);
+public privileged aspect BillTracing {
 	
 	private Call callDuringTest;
 	
 	private String resultMessage;
 	
-	after(ICustomer x, Call c): customerHangUp() && args(x) && target(c)  {
+	after(ICustomer x, Call c): Pointcuts.customerHangUp() && args(x) && target(c)  {
 		if (!(c.getCaller() == x)) {
 			Tracer.logPrint("montant de la connexion ");
 			if (c.getCaller().getAreaCode() == x.getAreaCode()) {
@@ -28,10 +24,11 @@ public aspect BillTracing {
 		}
 	}
 	
-	after() returning(ICall c): call(* *.getCall(..)) && withincode(void telecom.v2.simulate.Simulation.runTest*(..)) {
+	after() returning(ICall c): Pointcuts.getCall() && Pointcuts.inTestsFunctions() {
 		callDuringTest = (Call) c;
 	}
-	after() : call(void telecom.v2.simulate.Simulation.runTest*(..)){
+	
+	after() : Pointcuts.testsCall() {
 		resultMessage = "";
 		Tracer.addEmptyLine();
 		int callerTime = 0;
