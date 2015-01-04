@@ -10,23 +10,40 @@ import telecom.v2.connect.ICustomer;
 
 public privileged aspect BillingAspect {
 	
-	
+	/**
+	 * Prix de l'appel
+	 */
 	int Call.price;
 	
+	/**
+	 * Contient les différents prix en fonctions des Appelés (ICustomer).
+	 */
 	Map<ICustomer, Integer> Call.prices = new HashMap<ICustomer, Integer>();
 	
+	/**
+	 * Renvoie le prix de l'appel.
+	 */
 	public int Call.getPrice() {
 		return price;
 	}
 	
+	/**
+	 * Renvoie les ICustomer en attentes
+	 */
 	public Set<ICustomer> Call.getPendingCustomers() {
 		return pending.keySet();
 	}
 	
+	/**
+	 * Renvoie le prix de la communication en fonction de l'ICustomer
+	 */
 	public int Call.getPriceForCustomer(ICustomer c) {
 		return prices.get(c);
 	}
-	
+	 	
+	/**
+	 * Ajoute le prix de la communication pour l'ICustomer c.
+	 */
 	public void Call.addPriceForCustomer(ICustomer c, int price) {
 		prices.put(c, price);
 	}
