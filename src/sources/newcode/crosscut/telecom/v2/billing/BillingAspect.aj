@@ -51,9 +51,12 @@ public privileged aspect BillingAspect {
 	
 	after(Call c, ICustomer x, Object map) : Pointcuts.callStateChangedInDropped()  && this(c) && args(x) && target(map) {
 		try {
+			// On récupère la Map<ICustomer, Connection> complete
 			Field f = c.getClass().getDeclaredField("complete");
 			f.setAccessible(true);
+			// On vérifie que l'instance de la Map est bien l'instance de complete de l'appel
 			if (f.get(c) == map) {
+				// Si l'appelant est de la même région que l'appelé
 				if (c.getCaller().getAreaCode() == x.getAreaCode()) {
 					int price = getPrice(c.getTimer(x).getTime(), Type.LOCAL);
 					c.addPriceForCustomer(x, price);
@@ -65,13 +68,10 @@ public privileged aspect BillingAspect {
 				}
 			}
 		} catch (NoSuchFieldException | SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

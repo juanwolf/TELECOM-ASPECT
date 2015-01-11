@@ -21,7 +21,7 @@ public privileged aspect SimulationTracing {
 	/**
 	 * Factorisation du code pour les advices after pour les pointcuts des appels à call(), 
 	 * hangUp(), pickUp() et invite()
-		 */
+	 */
 	private void addToLogAfterMessage(JoinPoint jp, Object x) {
 		Tracer.removeTabulation();
 	 	SimulationMessages sm = SimulationMessages.get(x.getClass(), "final");
@@ -55,7 +55,6 @@ public privileged aspect SimulationTracing {
 			}
 			Tracer.logPrint(x + "(" + value);
 		} catch (IllegalAccessException | NoSuchFieldException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Tracer.addTabulation();
